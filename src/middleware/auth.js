@@ -17,7 +17,12 @@ function authenticate(req, res, next) {
     if (!decoded || !decoded.id) {
       return fail(res, { message: 'Invalid token', status: 401 });
     }
-    req.admin = { id: decoded.id, username: decoded.username };
+    req.admin = {
+      id: decoded.id,
+      username: decoded.username,
+      roleName: decoded.roleName || 'super_admin',
+      websiteId: decoded.websiteId ?? null,
+    };
     return next();
   } catch (err) {
     if (err.name === 'TokenExpiredError') {

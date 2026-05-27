@@ -1,9 +1,17 @@
-/** Map API status strings to DB boolean (parent_categories.status). */
+/** Map API status values to DB enum string ('active' | 'inactive'). */
 function toDbStatus(status) {
-  if (status === false || status === 0 || status === '0' || status === 'inactive' || status === 'false') {
-    return false;
+  if (
+    status === false ||
+    status === 0 ||
+    status === '0' ||
+    status === 'inactive' ||
+    status === 'false' ||
+    status === 'disabled' ||
+    status === 'off'
+  ) {
+    return 'inactive';
   }
-  return true;
+  return 'active';
 }
 
 function fromDbStatus(status) {

@@ -16,6 +16,7 @@ const SELECT_FIELDS = `
   image,
   status,
   featured,
+  availability,
   created_at,
   updated_at
 `;
@@ -58,6 +59,7 @@ async function findAllPaginated(filters) {
     featured,
     min_price,
     max_price,
+    availability,
     sort = 'created_at',
     order = 'DESC',
   } = filters;
@@ -104,6 +106,10 @@ async function findAllPaginated(filters) {
   if (max_price !== undefined && max_price !== null && max_price !== '') {
     where.push('price <= :max_price');
     params.max_price = max_price;
+  }
+  if (availability) {
+    where.push('availability = :availability');
+    params.availability = availability;
   }
 
   const whereSql = where.join(' AND ');

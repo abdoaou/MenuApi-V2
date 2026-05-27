@@ -1,5 +1,9 @@
 node_modules/
 .env
 *.log
+logs/
+coverage/
+src/uploads/
+desktop.ini
 .DS_Store
 npm-debug.log*

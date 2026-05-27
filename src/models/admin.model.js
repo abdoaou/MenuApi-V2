@@ -10,9 +10,10 @@ const SELECT_FIELDS = `
 
 async function findByEmailOrUsername(identifier) {
   const sql = `
-    SELECT id, username, email, password, created_at, updated_at
+    SELECT id, username, email, password, role_id, website_id, is_active, created_at, updated_at
     FROM admins
-    WHERE email = :identifier OR username = :identifier
+    WHERE (email = :identifier OR username = :identifier)
+      AND (deleted_at IS NULL)
     LIMIT 1
   `;
   const [rows] = await query(sql, { identifier });

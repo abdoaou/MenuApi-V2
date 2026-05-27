@@ -4,6 +4,10 @@ const SELECT_FIELDS = `
   id,
   name,
   slug,
+  domain,
+  config,
+  is_active,
+  deleted_at,
   created_at,
   updated_at
 `;

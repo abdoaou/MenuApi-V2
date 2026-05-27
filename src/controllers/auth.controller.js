@@ -1,6 +1,6 @@
 const authService = require('../services/auth.service');
 const asyncHandler = require('../utils/asyncHandler');
-const { loginRules } = require('../validations/auth.validation');
+const { loginRules, refreshRules } = require('../validations/auth.validation');
 const { validateRequest } = require('../middleware/validate');
 
 const login = [
@@ -11,12 +11,37 @@ const login = [
     const result = await authService.login({ email, username, password });
     return res.status(200).json({
       success: true,
-      token: result.token,
-      admin: result.admin,
+      message: 'Login successful',
+      token: result.accessToken,
+      data: {
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+        admin: result.admin,
+      },
     });
   }),
 ];
 
-module.exports = {
-  login,
-};
+const refresh = [
+  ...refreshRules,
+  validateRequest,
+  asyncHandler(async (req, res) => {
+    const result = await authService.refresh(req.body.refreshToken);
+    return res.status(200).json({
+      success: true,
+      data: {
+        accessToken: result.accessToken,
+        admin: result.admin,
+      },
+    });
+  }),
+];
+
+const logout = [
+  asyncHandler(async (req, res) => {
+    await authService.logout(req.body?.refreshToken);
+    return res.status(200).json({ success: true, message: 'Logged out' });
+  }),
+];
+
+module.exports = { login, refresh, logout };

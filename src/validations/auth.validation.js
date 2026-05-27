@@ -12,6 +12,9 @@ const loginRules = [
   body('username').optional().isLength({ min: 3 }).withMessage('Username must be at least 3 characters'),
 ];
 
+const refreshRules = [body('refreshToken').notEmpty().withMessage('refreshToken is required')];
+
 module.exports = {
   loginRules,
+  refreshRules,
 };

@@ -29,14 +29,29 @@ function buildSupabaseDatabaseUrl() {
 
 const databaseUrl = buildSupabaseDatabaseUrl();
 
+const nodeEnv = process.env.NODE_ENV || 'development';
+
 module.exports = {
-  nodeEnv: process.env.NODE_ENV || 'development',
+  nodeEnv,
+  isProduction: nodeEnv === 'production',
+  isStaging: nodeEnv === 'staging',
+  isDevelopment: nodeEnv === 'development',
   port: Number(process.env.PORT) || 3000,
   databaseUrl,
   jwt: {
     secret: process.env.JWT_SECRET || 'change-me-in-production',
-    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+    expiresIn: process.env.JWT_EXPIRES_IN || '15m',
+    refreshSecret: process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET || 'change-me-refresh',
+    refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
   },
+  redis: {
+    url: process.env.REDIS_URL || '',
+    enabled: Boolean(process.env.REDIS_URL),
+  },
+  cache: {
+    menuTtlSeconds: Number(process.env.CACHE_MENU_TTL) || 300,
+  },
+  enforceHttps: process.env.ENFORCE_HTTPS === 'true',
   supabase: {
     url: process.env.SUPABASE_URL || '',
     /** Publishable (anon) or service_role key — use service_role on server for admin bypassing RLS */
@@ -62,5 +77,10 @@ module.exports = {
     maxFileSizeBytes: 5 * 1024 * 1024,
     allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
     allowedExtensions: ['.jpg', '.jpeg', '.png', '.webp'],
+    supabaseBucket: process.env.SUPABASE_STORAGE_BUCKET || 'menu-images',
+    imageMaxWidth: Number(process.env.IMAGE_MAX_WIDTH) || 1920,
+    imageQuality: Number(process.env.IMAGE_QUALITY) || 82,
   },
+  apiKeyHeader: process.env.API_KEY_HEADER || 'x-api-key',
+  tenantHeader: process.env.TENANT_HEADER || 'x-website-id',
 };
