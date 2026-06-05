@@ -152,7 +152,7 @@ async function updateVariant(id, body) {
 }
 
 async function removeVariant(id) {
-  const affected = await productVariantModel.softDelete(id);
+  const affected = await productVariantModel.deleteById(id);
   if (!affected) {
     const err = new Error('Product variant not found');
     err.statusCode = 404;
@@ -234,7 +234,7 @@ async function syncVariantsForProduct(productId, items, { replace = false } = {}
     for (const ex of existingList) {
       if (!keptIds.has(Number(ex.id))) {
         // eslint-disable-next-line no-await-in-loop
-        await productVariantModel.softDelete(ex.id);
+        await productVariantModel.deleteById(ex.id);
       }
     }
   }

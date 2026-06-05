@@ -104,8 +104,8 @@ async function updateCategory(id, data) {
   return meta.affectedRows;
 }
 
-async function softDelete(id) {
-  const sql = `UPDATE categories SET deleted_at = NOW() WHERE id = :id AND deleted_at IS NULL`;
+async function deleteById(id) {
+  const sql = `DELETE FROM categories WHERE id = :id`;
   const [, meta] = await query(sql, { id });
   return meta.affectedRows;
 }
@@ -144,6 +144,6 @@ module.exports = {
   countSlugUnderParent,
   insertCategory,
   updateCategory,
-  softDelete,
+  deleteById,
   getDescendantIds,
 };

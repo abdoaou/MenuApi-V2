@@ -95,7 +95,7 @@ async function run() {
         if (e.statusCode !== 404) throw e;
       }
       if (stillThere) throw new Error('still exists after delete');
-      ok('DELETE soft-delete');
+      ok('DELETE hard-delete');
     } catch (e) {
       fail('DELETE', e);
     }
@@ -152,7 +152,7 @@ async function run() {
     }
     if (!blocked) throw new Error('expected 409 when children exist');
     ok('DELETE blocked when subcategories exist');
-    await categoryModel.softDelete(childId);
+    await categoryModel.deleteById(childId);
     await parentCategoryService.removeParentCategory(parent.id);
     ok('Cleanup parent+child test rows');
   } catch (e) {

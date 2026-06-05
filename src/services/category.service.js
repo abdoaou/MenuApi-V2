@@ -142,7 +142,7 @@ async function updateCategory(id, body, file) {
 }
 
 async function removeCategory(id) {
-  const affected = await categoryModel.softDelete(id);
+  const affected = await categoryModel.deleteById(id);
   if (!affected) {
     const err = new Error('Category not found');
     err.statusCode = 404;
