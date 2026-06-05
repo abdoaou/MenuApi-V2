@@ -205,7 +205,7 @@ async function updateProduct(id, body, file) {
 }
 
 async function removeProduct(id) {
-  const affected = await productModel.softDelete(id);
+  const affected = await productModel.deleteById(id);
   if (!affected) {
     const err = new Error('Product not found');
     err.statusCode = 404;

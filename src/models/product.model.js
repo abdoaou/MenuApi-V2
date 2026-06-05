@@ -169,8 +169,8 @@ async function updateProduct(id, data) {
   return meta.affectedRows;
 }
 
-async function softDelete(id) {
-  const sql = `UPDATE products SET deleted_at = NOW() WHERE id = :id AND deleted_at IS NULL`;
+async function deleteById(id) {
+  const sql = `DELETE FROM products WHERE id = :id`;
   const [, meta] = await query(sql, { id });
   return meta.affectedRows;
 }
@@ -180,6 +180,6 @@ module.exports = {
   findAllPaginated,
   insertProduct,
   updateProduct,
-  softDelete,
+  deleteById,
   countByWebsiteSlug,
 };
