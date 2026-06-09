@@ -2,13 +2,8 @@ const parentCategoryModel = require('../models/parentCategory.model');
 const categoryModel = require('../models/category.model');
 const websiteModel = require('../models/website.model');
 const { slugify, randomSuffix } = require('../utils/slug');
-const { resolveImageField } = require('../utils/resolveImage');
+const { resolveImageFieldAsync } = require('../utils/resolveImage');
 const { toDbStatus, formatParentRow } = require('../utils/parentCategoryStatus');
-
-function categoryFileUrl(file) {
-  if (!file) return null;
-  return `/uploads/categories/${file.filename}`;
-}
 
 async function assertWebsite(websiteId) {
   const site = await websiteModel.findById(websiteId);
@@ -32,14 +27,14 @@ async function ensureUniqueSlug(baseSlug, excludeId) {
   throw err;
 }
 
-function normalizeBody(merged, file, imageInput, imageFallback = null) {
+async function normalizeBody(merged, file, imageInput, imageFallback = null) {
   return {
     website_id: Number(merged.website_id) || 1,
     name: merged.name,
     slug: merged.slug,
     description: merged.description ?? null,
     status: toDbStatus(merged.status ?? 'active'),
-    image: resolveImageField(imageInput, file, categoryFileUrl, imageFallback),
+    image: await resolveImageFieldAsync(imageInput, file, 'categories', imageFallback),
   };
 }
 
@@ -68,7 +63,7 @@ async function createParentCategory(body, file) {
   await assertWebsite(websiteId);
 
   const slug = await ensureUniqueSlug(body.slug || body.name, null);
-  const payload = normalizeBody({ ...body, website_id: websiteId, slug }, file, body, null);
+  const payload = await normalizeBody({ ...body, website_id: websiteId, slug }, file, body, null);
   payload.slug = slug;
 
   const id = await parentCategoryModel.insert(payload);
@@ -93,7 +88,7 @@ async function updateParentCategory(id, body, file) {
   }
 
   const merged = { ...existing, ...body, website_id: websiteId, slug };
-  const payload = normalizeBody(merged, file, body, existing.image);
+  const payload = await normalizeBody(merged, file, body, existing.image);
 
   const affected = await parentCategoryModel.update(id, payload);
   if (!affected) {

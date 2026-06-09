@@ -4,6 +4,14 @@ const { getSupabase } = require('../config/supabase');
 const env = require('../config/env');
 const logger = require('../utils/logger');
 
+function toPublicUrl(relativePath) {
+  const normalized = relativePath.startsWith('/') ? relativePath : `/${relativePath}`;
+  if (env.publicAssetBaseUrl) {
+    return `${env.publicAssetBaseUrl}${normalized}`;
+  }
+  return normalized;
+}
+
 let sharp;
 try {
   // eslint-disable-next-line global-require
@@ -51,7 +59,7 @@ async function uploadImage(file, folder) {
   if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
   const localPath = path.join(dest, filename);
   fs.writeFileSync(localPath, optimized);
-  return `/uploads/${folder}/${filename}`;
+  return toPublicUrl(`/uploads/${folder}/${filename}`);
 }
 
-module.exports = { uploadImage, optimizeBuffer };
+module.exports = { uploadImage, optimizeBuffer, toPublicUrl };

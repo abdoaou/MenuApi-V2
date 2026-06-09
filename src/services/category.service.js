@@ -1,12 +1,7 @@
 const categoryModel = require('../models/category.model');
 const parentCategoryModel = require('../models/parentCategory.model');
 const { slugify, randomSuffix } = require('../utils/slug');
-const { resolveImageField } = require('../utils/resolveImage');
-
-function categoryFileUrl(file) {
-  if (!file) return null;
-  return `/uploads/categories/${file.filename}`;
-}
+const { resolveImageFieldAsync } = require('../utils/resolveImage');
 
 async function assertParent(parentId, excludeId) {
   if (parentId === null || parentId === undefined || parentId === '') {
@@ -74,7 +69,7 @@ async function getCategoryById(id) {
   };
 }
 
-function normalizeCategoryBody(merged, file, imageInput, imageFallback = null) {
+async function normalizeCategoryBody(merged, file, imageInput, imageFallback = null) {
   const parentRaw = merged.parent_id;
   const parent_id =
     parentRaw === '' || parentRaw === undefined || parentRaw === null ? null : Number(parentRaw);
@@ -85,7 +80,7 @@ function normalizeCategoryBody(merged, file, imageInput, imageFallback = null) {
     slug: merged.slug,
     description: merged.description ?? null,
     status: merged.status ?? 'active',
-    image: resolveImageField(imageInput, file, categoryFileUrl, imageFallback),
+    image: await resolveImageFieldAsync(imageInput, file, 'categories', imageFallback),
   };
 }
 
@@ -94,7 +89,7 @@ async function createCategory(body, file) {
   const base = body.slug || body.name;
   const slug = await ensureUniqueCategorySlug(parent_id, base, null);
 
-  const payload = normalizeCategoryBody({ ...body, parent_id }, file, body, null);
+  const payload = await normalizeCategoryBody({ ...body, parent_id }, file, body, null);
   payload.slug = slug;
 
   const id = await categoryModel.insertCategory(payload);
@@ -129,7 +124,7 @@ async function updateCategory(id, body, file) {
 
   const merged = { ...existing, ...body };
   merged.parent_id = parent_id;
-  const payload = normalizeCategoryBody(merged, file, body, existing.image);
+  const payload = await normalizeCategoryBody(merged, file, body, existing.image);
   payload.slug = slug;
 
   const affected = await categoryModel.updateCategory(id, payload);

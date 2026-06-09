@@ -4,13 +4,8 @@ const websiteModel = require('../models/website.model');
 const categoryModel = require('../models/category.model');
 const parentCategoryModel = require('../models/parentCategory.model');
 const { slugify, randomSuffix } = require('../utils/slug');
-const { resolveImageField } = require('../utils/resolveImage');
+const { resolveImageFieldAsync } = require('../utils/resolveImage');
 const { parseVariantList, hasVariantListField } = require('../utils/parseVariantList');
-
-function productFileUrl(file) {
-  if (!file) return null;
-  return `/uploads/products/${file.filename}`;
-}
 
 function paginationMeta({ page, limit, total }) {
   const p = Math.max(1, Number(page) || 1);
@@ -125,7 +120,7 @@ function asBoolInt(value, defaultValue = 0) {
   return truthy ? 1 : 0;
 }
 
-function normalizePayload(merged, file, imageInput, imageFallback = null) {
+async function normalizePayload(merged, file, imageInput, imageFallback = null) {
   return {
     website_id: merged.website_id,
     category_id: merged.category_id === '' ? null : merged.category_id ?? null,
@@ -138,7 +133,7 @@ function normalizePayload(merged, file, imageInput, imageFallback = null) {
     sale_price: merged.sale_price === '' ? null : merged.sale_price ?? null,
     stock: merged.stock,
     sku: merged.sku,
-    image: resolveImageField(imageInput, file, productFileUrl, imageFallback),
+    image: await resolveImageFieldAsync(imageInput, file, 'products', imageFallback),
     status: merged.status ?? 'draft',
     featured: asBoolInt(merged.featured, false),
   };
@@ -152,7 +147,7 @@ async function createProduct(body, file) {
   const base = body.slug || body.name;
   const slug = await ensureUniqueProductSlug(body.website_id, base, null);
 
-  const payload = normalizePayload(body, file, body, null);
+  const payload = await normalizePayload(body, file, body, null);
   payload.slug = slug;
 
   const id = await productModel.insertProduct(payload);
@@ -186,7 +181,7 @@ async function updateProduct(id, body, file) {
 
   const merged = { ...existing, ...productFields };
   delete merged.variants;
-  const payload = normalizePayload(merged, file, productFields, existing.image);
+  const payload = await normalizePayload(merged, file, productFields, existing.image);
   payload.slug = slug;
 
   const affected = await productModel.updateProduct(id, payload);

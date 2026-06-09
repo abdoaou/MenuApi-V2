@@ -73,6 +73,8 @@ module.exports = {
     queueLimit: 0,
     ssl: process.env.DB_SSL === 'true' || Boolean(databaseUrl),
   },
+  /** Base URL for locally served uploads (e.g. https://menuapi-v2-test.up.railway.app) */
+  publicAssetBaseUrl: (process.env.PUBLIC_ASSET_BASE_URL || '').replace(/\/$/, ''),
   upload: {
     maxFileSizeBytes: 5 * 1024 * 1024,
     allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp'],

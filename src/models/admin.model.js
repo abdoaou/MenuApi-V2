@@ -4,6 +4,7 @@ const SELECT_FIELDS = `
   id,
   username,
   email,
+  website_id,
   created_at,
   updated_at
 `;
@@ -28,7 +29,7 @@ async function findById(id) {
 
 async function findByIdWithPassword(id) {
   const sql = `
-    SELECT id, username, email, password, created_at, updated_at
+    SELECT id, username, email, password, website_id, created_at, updated_at
     FROM admins
     WHERE id = :id
     LIMIT 1
@@ -67,8 +68,8 @@ async function countByEmail(email, excludeId = null) {
 
 async function insertAdmin(data) {
   const sql = `
-    INSERT INTO admins (username, email, password)
-    VALUES (:username, :email, :password)
+    INSERT INTO admins (username, email, password, website_id)
+    VALUES (:username, :email, :password, :website_id)
     ${driver === 'postgres' ? 'RETURNING id' : ''}
   `;
   const [, meta] = await query(sql, data);
@@ -80,7 +81,8 @@ async function updateAdmin(id, data) {
     UPDATE admins SET
       username = :username,
       email = :email,
-      password = :password
+      password = :password,
+      website_id = :website_id
     WHERE id = :id
   `;
   const [, meta] = await query(sql, { ...data, id });

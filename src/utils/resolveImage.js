@@ -1,12 +1,11 @@
+const { uploadImage } = require('../services/storage.service');
+
 /**
- * Image from multipart file (priority) or JSON `image` URL string.
+ * Image from JSON `image` URL string.
  * Empty string / null / whitespace → null (clear image).
  * If `image` is omitted on update, returns `fallback` (usually existing URL).
  */
-function resolveImageField(body, file, fileToUrl, fallback = null) {
-  if (file) {
-    return fileToUrl(file);
-  }
+function resolveBodyImage(body, fallback = null) {
   if (Object.prototype.hasOwnProperty.call(body, 'image')) {
     const raw = body.image;
     if (raw === null || raw === '') {
@@ -21,4 +20,14 @@ function resolveImageField(body, file, fileToUrl, fallback = null) {
   return fallback;
 }
 
-module.exports = { resolveImageField };
+/**
+ * Upload multipart file to cloud storage (or local fallback) and return a public URL.
+ */
+async function resolveImageFieldAsync(body, file, folder, fallback = null) {
+  if (file) {
+    return uploadImage(file, folder);
+  }
+  return resolveBodyImage(body, fallback);
+}
+
+module.exports = { resolveBodyImage, resolveImageFieldAsync };
