@@ -12,6 +12,7 @@
     "verify:env": "node scripts/verify-env.js",
     "verify:db": "node scripts/test-db.js",
     "test:parent-categories": "node scripts/test-parent-categories.js",
+    "test:image-crud": "node scripts/test-image-crud.js",
     "diagnose": "node scripts/diagnose.js"
   },
   "engines": {
