@@ -41,17 +41,23 @@ async function uploadImage(file, folder) {
 
   const supabase = getSupabase();
   if (supabase && env.supabase.key) {
-    const { error } = await supabase.storage
-      .from(env.upload.supabaseBucket)
-      .upload(storagePath, optimized, {
-        contentType: 'image/webp',
-        upsert: false,
+    try {
+      const { error } = await supabase.storage
+        .from(env.upload.supabaseBucket)
+        .upload(storagePath, optimized, {
+          contentType: 'image/webp',
+          upsert: false,
+        });
+      if (error) {
+        logger.warn('Supabase upload failed, using local', { error: error.message });
+      } else {
+        const { data } = supabase.storage.from(env.upload.supabaseBucket).getPublicUrl(storagePath);
+        return data.publicUrl;
+      }
+    } catch (err) {
+      logger.warn('Supabase client/upload error, using local', {
+        error: err instanceof Error ? err.message : String(err),
       });
-    if (error) {
-      logger.warn('Supabase upload failed, using local', { error: error.message });
-    } else {
-      const { data } = supabase.storage.from(env.upload.supabaseBucket).getPublicUrl(storagePath);
-      return data.publicUrl;
     }
   }
 
